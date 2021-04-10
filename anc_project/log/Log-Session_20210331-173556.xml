@@ -1,0 +1,7 @@
+<?xml version="1.0" ?><Session>
+<NegotiationOutcome exception="Failed to execute protocol: Execution failed of KnutAgent@0:java.util.IllegalFormatConversionException: d != java.lang.Double: d != java.lang.Double" currentTime="Wed Mar 31 17:35:56 CEST 2021" lastAction="null" bids="2" runtime="0.043075987" deadline="60rounds">
+<resultsOfAgent agent="KnutAgent" utilspace="etc/templates/partydomain/party1_utility.xml" agentClass="/home/kveriksen/Documents/ANC/anc_project/bin/KnutAgent.class" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
+</resultsOfAgent>
+<resultsOfAgent agent="TimeDependentAgentLinear" utilspace="etc/templates/partydomain/party2_utility.xml" agentClass="agents.TimeDependentAgentLinear" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
+</resultsOfAgent>
+</NegotiationOutcome></Session>
