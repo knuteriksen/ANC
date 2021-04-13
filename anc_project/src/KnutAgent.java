@@ -21,15 +21,22 @@ import genius.core.Domain;
 
 public class KnutAgent extends AbstractNegotiationParty 
 {
+	/*Minimum utility when creating random bids*/
 	private static double MINIMUM_TARGET = 0.8;
-	private static double RANDOM_STOP_TIME = 0.97;
-	private static double AVERAGE_STOP_TIME = 0.90;
+	
+	/*Times at wich to stop using current strategy and go on to next one*/
 	private static double MAXIMUM_STOP_TIME = 0.45;
+	private static double AVERAGE_STOP_TIME = 0.90;
+	private static double RANDOM_STOP_TIME = 0.97;
 	
+	/*Last bid received from opponent*/
 	private Bid last_bid_received;
+
+	/*My previous bid sent*/
 	private Bid my_prev_bid;
-	private BidHistory bids_received;
 	
+	/*BidHistory with all bids of opponent*/
+	private BidHistory bids_received;
 	
 
 	/**
@@ -51,7 +58,8 @@ public class KnutAgent extends AbstractNegotiationParty
 		if (last_bid_received != null) {
 			double time = timeline.getTime();
 			
-			if (time < MAXIMUM_STOP_TIME) {	//Do not accept any received offers. Always try to maximize utility.
+			//Respond with maximum utility.
+			if (time < MAXIMUM_STOP_TIME) {	
 				System.out.println("Maximum Utility");
 				Bid bid = generateMaximumUtilityBid();
 				my_prev_bid = bid;
@@ -61,7 +69,8 @@ public class KnutAgent extends AbstractNegotiationParty
 				return new Offer(getPartyId(), bid);
 			}
 			
-			else if (time < AVERAGE_STOP_TIME) { //Do not accept any received offers. Respond with average tit for tat.
+			//Respond with average tit for tat.
+			else if (time < AVERAGE_STOP_TIME) {
 				System.out.println("Average Utility");
 				Bid bid = generateAveragedTitForTatBid();
 				my_prev_bid = bid;
@@ -71,6 +80,7 @@ public class KnutAgent extends AbstractNegotiationParty
 				return new Offer(getPartyId(), bid);
 			}			
 			
+			//Resoind with random bid above target.
 			else if (time < RANDOM_STOP_TIME){
 				System.out.println("Random above target");
 				Bid bid = generateRandomBidAboveTarget();
@@ -81,6 +91,8 @@ public class KnutAgent extends AbstractNegotiationParty
 				else {return new Offer(getPartyId(), bid);
 				}
 			}
+			
+			//If last bid received is above minimum target, accept it. Else respond with random bid above target.
 			else {
 				System.out.println("Accept");
 				if (getUtility(last_bid_received) > MINIMUM_TARGET) {
@@ -115,8 +127,10 @@ public class KnutAgent extends AbstractNegotiationParty
 		Bid bid;
 		double time_end = timeline.getTime();
 		
-		/*If we are early in the negotiation I expect to see smaller changes, and thus uses a larger window
-		 * If we are closer to the end of the negotiation I expect greater changes, and thus uses a smaller window*/
+		/*
+		 * If we are early in the negotiation I expect to see smaller changes, and thus uses a larger window
+		 * If we are closer to the end of the negotiation I expect greater changes, and thus uses a smaller window
+		*/
 		
 		double time_start = time_end - 0.15;
 		if (AVERAGE_STOP_TIME - time_end < 0.05) {
@@ -137,14 +151,6 @@ public class KnutAgent extends AbstractNegotiationParty
 		double min_utility = getUtility(generateMinimumUtilityBid());
 		
 		double avg_utility_change = (last_bid_util - first_bid_util)/(bids_received_within_time.getHistory().size()-1);
-
-				
-		/*
-		 * 
-		 * Make sure that there is at least a gap of 0.04 between the lower and upper bound
-		 * 
-		 */
-		
 		
 		/*Not lower than minimum*/		
 		double utility_start = Math.max(getUtility(my_prev_bid)-(avg_utility_change*1.05), min_utility);
@@ -152,8 +158,9 @@ public class KnutAgent extends AbstractNegotiationParty
 		/*Not higher than maximum*/
 		double utility_end = Math.min(getUtility(my_prev_bid)-avg_utility_change*0.95, max_utility);
 		
-		double gap = utility_end - utility_start;
 		
+		//Make sure that there is at least a gap of 0.04 between the lower and upper bound
+		double gap = utility_end - utility_start;
 		if (gap <= 0.04) {
 			utility_start = utility_start + gap - 0.04;
 		}
@@ -164,9 +171,6 @@ public class KnutAgent extends AbstractNegotiationParty
 	}
 	
 	private Bid getBidsOfUtility(double lowerBound, double upperBound, Domain domain) {
-		// In big domains, we need to find only this amount of bids around the
-		// target. Should be at least 2.
-		
 		BidHistory possibleBidHistory = new BidHistory();
 		BidIterator myBidIterator = new BidIterator(domain);
 		
@@ -229,7 +233,7 @@ public class KnutAgent extends AbstractNegotiationParty
 	@Override
 	public String getDescription() 
 	{
-		return "Places random bids >= " + MINIMUM_TARGET;
+		return "Knut Agent";
 	}
 
 	/**
