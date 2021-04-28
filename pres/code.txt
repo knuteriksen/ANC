@@ -1,0 +1,69 @@
+private Bid generateAveragedTitForTatBid() 
+	{
+		Bid bid;
+		double time_end = timeline.getTime();
+		
+		/*
+		 * If we are early in the negotiation I expect to see smaller changes, and thus uses a larger window
+		 * If we are closer to the end of the negotiation I expect greater changes, and thus uses a smaller window
+		*/
+		
+		double time_start = time_end - 0.15;
+		if (AVERAGE_STOP_TIME - time_end < 0.05) {
+			time_start = time_end - 0.075;
+		}
+				
+		
+		BidHistory bids_received_within_time = new BidHistory();
+		bids_received_within_time = bids_received.filterBetweenTime(time_start, time_end).sortToTime();
+						
+		Bid first_bid = bids_received_within_time.getFirstBidDetails().getBid();
+		Bid last_bid = bids_received_within_time.getLastBidDetails().getBid();	
+		
+		double first_bid_util = getUtility(first_bid); 
+		double last_bid_util = getUtility(last_bid);		
+		
+		double max_utility = getUtility(generateMaximumUtilityBid());
+		double min_utility = getUtility(generateMinimumUtilityBid());
+		
+		double avg_utility_change = (last_bid_util - first_bid_util)/(bids_received_within_time.getHistory().size()-1);
+		
+		/*Not lower than minimum*/		
+		double utility_start = Math.max(getUtility(my_prev_bid)-(avg_utility_change*1.05), min_utility);
+		
+		/*Not higher than maximum*/
+		double utility_end = Math.min(getUtility(my_prev_bid)-avg_utility_change*0.95, max_utility);
+		
+		
+		//Make sure that there is at least a gap of 0.04 between the lower and upper bound
+		double gap = utility_end - utility_start;
+		if (gap <= 0.04) {
+			utility_start = utility_start + gap - 0.04;
+		}
+		
+		bid = getBidsOfUtility(utility_start, utility_end, first_bid.getDomain());
+		
+		return bid;
+	}
+	
+private Bid getBidsOfUtility(double lowerBound, double upperBound, Domain domain) {
+		BidHistory possibleBidHistory = new BidHistory();
+		BidIterator myBidIterator = new BidIterator(domain);
+		
+		while (myBidIterator.hasNext()) {
+			Bid b = myBidIterator.next();
+			try {
+				double util = utilitySpace.getUtility(b);
+				if (util >= lowerBound && util <= upperBound) {
+					possibleBidHistory.add(new BidDetails(b,util));
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		Bid bid = possibleBidHistory.getBestBidDetails().getBid();
+		
+		return bid;
+	}
