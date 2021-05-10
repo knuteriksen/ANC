@@ -1,7 +1,0 @@
-<?xml version="1.0" ?><Session>
-<NegotiationOutcome exception="Failed to execute protocol: Execution failed of KnutAgent@2:java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0: Index 0 out of bounds for length 0" currentTime="Wed Mar 31 17:30:23 CEST 2021" lastAction="null" bids="54" runtime="0.315869414" deadline="60rounds">
-<resultsOfAgent agent="KnutAgent" utilspace="etc/templates/partydomain/party1_utility.xml" agentClass="/home/kveriksen/Documents/ANC/anc_project/bin/KnutAgent.class" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
-</resultsOfAgent>
-<resultsOfAgent agent="RandomParty" utilspace="etc/templates/partydomain/party2_utility.xml" agentClass="negotiator.parties.RandomParty" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
-</resultsOfAgent>
-</NegotiationOutcome></Session>
