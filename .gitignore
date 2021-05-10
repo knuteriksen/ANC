@@ -59,5 +59,6 @@ local.properties
 # Typically, this file would be tracked if it contains build/dependency configurations:
 #.project
 
+Genius/
 anc_project/log/
-
+anc_project/Genius/

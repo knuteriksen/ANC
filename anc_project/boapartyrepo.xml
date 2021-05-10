@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <boaPartiesList>
-	<boaparties partyName="boa_0">
+    <boaparties partyName="boa_0">
         <properties/>
         <biddingStrategy>
             <item classpath="negotiator.boaframework.offeringstrategy.anac2011.HardHeaded_Offering"/>
@@ -150,7 +150,7 @@
     <boaparties partyName="boa_9">
         <properties/>
         <biddingStrategy>
-                <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2011.AC_BRAMAgent"/>
@@ -167,7 +167,7 @@
     <boaparties partyName="boa_10">
         <properties/>
         <biddingStrategy>
-		<item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2011.AC_BRAMAgent"/>
@@ -183,7 +183,7 @@
     <boaparties partyName="boa_11">
         <properties/>
         <biddingStrategy>
-		<item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2011.AC_BRAMAgent"/>
@@ -199,7 +199,7 @@
     <boaparties partyName="boa_12">
         <properties/>
         <biddingStrategy>
-		<item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2012.AC_AgentMR"/>
@@ -216,7 +216,7 @@
     <boaparties partyName="boa_13">
         <properties/>
         <biddingStrategy>
-		<item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2012.AC_AgentMR"/>
@@ -232,7 +232,7 @@
     <boaparties partyName="boa_14">
         <properties/>
         <biddingStrategy>
-		<item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2012.AC_AgentMR"/>
@@ -248,7 +248,7 @@
     <boaparties partyName="boa_15">
         <properties/>
         <biddingStrategy>
-		<item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2010.AC_AgentK"/>
@@ -265,7 +265,7 @@
     <boaparties partyName="boa_16">
         <properties/>
         <biddingStrategy>
-		<item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2010.AC_AgentK"/>
@@ -281,7 +281,7 @@
     <boaparties partyName="boa_17">
         <properties/>
         <biddingStrategy>
-		<item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.IAMHaggler2012_Offering"/>
         </biddingStrategy>
         <acceptanceStrategy>
             <item classpath="negotiator.boaframework.acceptanceconditions.anac2010.AC_AgentK"/>
@@ -435,6 +435,22 @@
         </acceptanceStrategy>
         <opponentModel>
             <item classpath="negotiator.boaframework.opponentmodel.PerfectModel"/>
+        </opponentModel>
+        <omStrategy>
+            <parameters name="t" value="1.1"/>
+            <item classpath="negotiator.boaframework.omstrategy.BestBid"/>
+        </omStrategy>
+    </boaparties>
+    <boaparties partyName="newParty">
+        <properties/>
+        <biddingStrategy>
+            <item classpath="negotiator.boaframework.offeringstrategy.anac2011.HardHeaded_Offering"/>
+        </biddingStrategy>
+        <acceptanceStrategy>
+            <item classpath="negotiator.boaframework.acceptanceconditions.anac2011.AC_BRAMAgent"/>
+        </acceptanceStrategy>
+        <opponentModel>
+            <item classpath="/home/kveriksen/Documents/ANC/anc_project/bin/KnutModel.class"/>
         </opponentModel>
         <omStrategy>
             <parameters name="t" value="1.1"/>
