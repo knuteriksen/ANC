@@ -86,6 +86,7 @@
 		<opponentmodel description="Uniform Model" classpath="negotiator.boaframework.opponentmodel.UniformModel"/>
 		<opponentmodel description="Default Model" classpath="negotiator.boaframework.opponentmodel.DefaultModel"/>
 		<opponentmodel description="Nash Frequency Model" classpath="negotiator.boaframework.opponentmodel.NashFrequencyModel"/>
+		<opponentmodel description="KnutModel2" classpath="/home/kveriksen/Documents/ANC/anc_project/bin/KnutModel2.class"/>
 		<opponentmodel description="Worst Model" classpath="negotiator.boaframework.opponentmodel.WorstModel"/>
 		<opponentmodel description="IAMhaggler Bayesian Model" classpath="negotiator.boaframework.opponentmodel.IAMhagglerBayesianModel"/>
 		<opponentmodel description="Bayesian Model" classpath="negotiator.boaframework.opponentmodel.BayesianModel"/>
