@@ -11,6 +11,7 @@ import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
 import agents.org.apache.commons.lang.SerializationUtils;
 import genius.core.Bid;
+import genius.core.BidHistory;
 import genius.core.Domain;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.BOAparameter;
@@ -49,6 +50,7 @@ public class KnutModel2 extends OpponentModel {
 		
 	private int count_offers_received_this_timewindow;
 	private int size_of_timewindow;
+	private boolean timewindow_changed;
 	
 	private OutcomeSpace outcome_space;
 
@@ -69,6 +71,7 @@ public class KnutModel2 extends OpponentModel {
 		delta = 0.15;
 		size_of_timewindow = 25;
 		first_time_window = true;
+		timewindow_changed = false;
 		
 		count_offers_received_this_timewindow = 0;
 		
@@ -152,25 +155,76 @@ public class KnutModel2 extends OpponentModel {
 		//Variable to detect if the opponent is conceding
 		boolean concession = false;
 		
+		
 		// Increment the total number of offers received in this time_window
 		count_offers_received_this_timewindow++;
 		
-		//If bid number 26		
-		if (count_offers_received_this_timewindow > 25) {
-			//Reset counter
-			count_offers_received_this_timewindow = 1;
-			
-			//Copy this time window into prev time window
-			count_issue_values_prev_timewindow = (Map<Integer, HashMap<Value, Integer>>) SerializationUtils.clone((Serializable) count_issue_values_this_timewindow); 
-			
-			//Reset this time window
-			for (HashMap.Entry<Integer, HashMap<Value, Integer>> e: count_issue_values_this_timewindow.entrySet()) {
-				int issue_id = e.getKey();
-				for (Map.Entry<Value, Integer> f : count_issue_values_this_timewindow.get(issue_id).entrySet()) {
-					Value value_id = f.getKey();
-					count_issue_values_this_timewindow.get(issue_id).put(value_id,0);
+		//If we should start a new time window		
+		if (count_offers_received_this_timewindow > size_of_timewindow) {
+			// If we should change size of time window - SHould only run once
+			if (time > 0.75 && timewindow_changed == false) {
+				System.out.println("#######################");
+				System.out.println("Change time window");
+				size_of_timewindow = 15;
+				timewindow_changed = true;
+				count_offers_received_this_timewindow = 1;
+				
+				List<BidDetails> bid_details = negotiationSession.getOpponentBidHistory().sortToTime().getHistory();
+				
+				System.out.println("Before reset:");
+				System.out.println(count_issue_values_prev_timewindow.toString());
+				//Reset prev time window
+				for (HashMap.Entry<Integer, HashMap<Value, Integer>> e: count_issue_values_prev_timewindow.entrySet()) {
+					int issue_id = e.getKey();
+					for (Map.Entry<Value, Integer> f : count_issue_values_prev_timewindow.get(issue_id).entrySet()) {
+						Value value_id = f.getKey();
+						count_issue_values_prev_timewindow.get(issue_id).put(value_id,0);
+					}	
+				}
+				System.out.println("After reset/Before resize:");
+				System.out.println(count_issue_values_prev_timewindow.toString());
+				//Resize prev time window to contain the count of the new window size
+				for (int i = bid_details.size() - 1; i > bid_details.size()-1-size_of_timewindow; i--) {
+					HashMap<Integer,Value> b = bid_details.get(i).getBid().getValues();
+					for(HashMap.Entry<Integer, Value> e: b.entrySet()) {
+						int issue_id = e.getKey();
+						Value value_id = e.getValue();
+						int value_count = count_issue_values_prev_timewindow.get(issue_id).get(value_id)+1;
+						count_issue_values_prev_timewindow.get(issue_id).put(value_id, value_count);
+					}
+				}
+				System.out.println("After resize:");
+				System.out.println(count_issue_values_prev_timewindow.toString());
+				System.out.println("Time window changed");
+				System.out.println("#######################");
+				
+				//Reset this time window
+				for (HashMap.Entry<Integer, HashMap<Value, Integer>> e: count_issue_values_this_timewindow.entrySet()) {
+					int issue_id = e.getKey();
+					for (Map.Entry<Value, Integer> f : count_issue_values_this_timewindow.get(issue_id).entrySet()) {
+						Value value_id = f.getKey();
+						count_issue_values_this_timewindow.get(issue_id).put(value_id,0);
+					}	
+				}
+			}
+
+			else {
+			// If we should not change size of time window
+				//Reset counter
+				count_offers_received_this_timewindow = 1;
+				
+				//Copy this time window into prev time window
+				count_issue_values_prev_timewindow = (Map<Integer, HashMap<Value, Integer>>) SerializationUtils.clone((Serializable) count_issue_values_this_timewindow); 
+				
+				//Reset this time window
+				for (HashMap.Entry<Integer, HashMap<Value, Integer>> e: count_issue_values_this_timewindow.entrySet()) {
+					int issue_id = e.getKey();
+					for (Map.Entry<Value, Integer> f : count_issue_values_this_timewindow.get(issue_id).entrySet()) {
+						Value value_id = f.getKey();
+						count_issue_values_this_timewindow.get(issue_id).put(value_id,0);
+					}	
 				}	
-			}	
+			}
 		}
 		
 		// The issues and its value from the new bid received
@@ -201,7 +255,12 @@ public class KnutModel2 extends OpponentModel {
 		if (first_time_window == true) {
 			first_time_window = false;
 			return;
-		}		
+		}
+		
+		System.out.println("Count this time window before algorithm");
+		System.out.println(count_issue_values_prev_timewindow.toString());
+		System.out.println("Count prev time window before algorithm");
+		System.out.println(count_issue_values_this_timewindow.toString());
 	
 		// Algorithm
 		for (Map.Entry<Integer, HashMap<Value, Integer>> e : count_issue_values_prev_timewindow.entrySet()) {
@@ -236,9 +295,6 @@ public class KnutModel2 extends OpponentModel {
 				freq_issue_values_this_timewindow_map.put(value_id, this_freq_dist);
 			}
 			
-			
-			
-			
 			//Convert arrayList to primitive array [] for chi square test
 			double[] freq_issue_values_prev_timewindow_array = new double[freq_issue_values_prev_timewindow_arrayList.size()];
 			long[] freq_issue_values_this_timewindow_array = new long[freq_issue_values_this_timewindow_arrayList.size()];
@@ -247,6 +303,7 @@ public class KnutModel2 extends OpponentModel {
 				freq_issue_values_prev_timewindow_array[i] = freq_issue_values_prev_timewindow_arrayList.get(i).doubleValue();
 				freq_issue_values_this_timewindow_array[i] = freq_issue_values_this_timewindow_arrayList.get(i).longValue();
 			}
+			
 			
 			//Chi square test
 			ChiSquareTest t = new ChiSquareTest();
@@ -260,6 +317,7 @@ public class KnutModel2 extends OpponentModel {
 	        //Cannot reject null hypothesis
 	        if (pval > 0.05) {
 	        	unchanged_issues.add(issue_id);
+	        	System.out.println(issue_id +" Did not change");
 	        }
 	        
 	        //Can reject null hypothesis
@@ -279,21 +337,24 @@ public class KnutModel2 extends OpponentModel {
 			    	//Calculate estimated issue utility
 					double freq_issue_value_this_timewindow = freq_issue_values_this_timewindow_map.get(value_id);
 					estimated_issue_utility_this_timewindow += freq_issue_value_this_timewindow * value_estimation;
-					
-					//Check for concession
-					if (estimated_issue_utility_this_timewindow < estimated_issue_utility_prev_timewindow) {
-						concession = true;
-					}
-			    	
 				}
-
+	        	//Check for concession
+				if (estimated_issue_utility_this_timewindow < estimated_issue_utility_prev_timewindow) {
+					concession = true;
+					System.out.println(issue_id + " Is conceding");
+				}
+				else {
+					System.out.println(issue_id + " Changed, but is not conceding");
+				}
 	        }
 		}
+		
 		if (unchanged_issues.size() > 0 && concession == true) {
 			for (Integer i : unchanged_issues) {
 				estimated_issue_weights.put(i, estimated_issue_weights.get(i)+delta);
 			}
 		}
+		System.out.println("----------------------------");
 	}
 	
 	@Override
