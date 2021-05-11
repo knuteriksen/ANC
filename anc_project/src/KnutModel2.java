@@ -62,12 +62,6 @@ public class KnutModel2 extends OpponentModel {
 	@Override
 	public void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
-		
-		/*En esta parte del código debes poner cualquier instrucción que necesites
-		 * para la inicialización del modelo de aprendizaje
-		 */
-		
-		/*Constants*/
 		delta = 0.15;
 		size_of_timewindow = 25;
 		first_time_window = true;
@@ -96,18 +90,8 @@ public class KnutModel2 extends OpponentModel {
             for (Map.Entry<Integer, Value> e : all_possible_issue_values.entrySet()) {
             	int issue_id = e.getKey();
             	Value value_id = e.getValue();
-            	/*
-            	 * If issue id not in map
-            	 * 		Lage både ny ytre og indre
-            	 * 
-            	 * Else
-            	 * 		Da må det allerede eksistere 1
-            	 * 		Sjekke om value er i indre kartet til ytre kart
-            	 *			Om ikke lage et nytt kart som består av ny value og 0, + gamle
-            	 *
-            	 *		Om ikke er det ikke vits i å gjøre noe
-            	 * */
-            	
+
+            	// If issue is new
             	if (!(count_issue_values_this_timewindow.containsKey(issue_id))) {
             		// Initialize counter for issue values
             		HashMap<Value, Integer> count_value_map = new HashMap<Value, Integer>();
@@ -122,6 +106,7 @@ public class KnutModel2 extends OpponentModel {
         			estimation_value_map.put(value_id, 0.0);
         			issue_value_estimation.put(issue_id, estimation_value_map);
             	}
+            	//If issue exist and value is new
             	else if(!(count_issue_values_this_timewindow.get(issue_id).containsKey(value_id))) {
             		// Initialize counter for issue values
             		count_issue_values_this_timewindow.get(issue_id).put(value_id, 0);
@@ -143,18 +128,12 @@ public class KnutModel2 extends OpponentModel {
 	}
 	
 	@Override
-	protected void updateModel(Bid bid, double time) {
-		 /*
-		  * En esta parte del código debes poner la lógica a realizar por el modelo
-		  * cuando una oferta del oponente es recibida
-		  */
-		
+	protected void updateModel(Bid bid, double time) {		
 		//Set of issues which value is statistically is unchanged between time windows
 		List<Integer> unchanged_issues = new ArrayList<Integer>();
 		
 		//Variable to detect if the opponent is conceding
 		boolean concession = false;
-		
 		
 		// Increment the total number of offers received in this time_window
 		count_offers_received_this_timewindow++;
@@ -163,29 +142,30 @@ public class KnutModel2 extends OpponentModel {
 		if (count_offers_received_this_timewindow > size_of_timewindow) {
 			// If we should change size of time window - SHould only run once
 			if (time > 0.75 && timewindow_changed == false) {
-				System.out.println("#######################");
-				System.out.println("Change time window");
+				//Change size of timewindow
 				size_of_timewindow = 15;
 				timewindow_changed = true;
+				
+				//Reset counter
 				count_offers_received_this_timewindow = 1;
 				
-				List<BidDetails> bid_details = negotiationSession.getOpponentBidHistory().sortToTime().getHistory();
-				
-				System.out.println("Before reset:");
-				System.out.println(count_issue_values_prev_timewindow.toString());
-				//Reset prev time window
+				//Reset prev time window and this time window
 				for (HashMap.Entry<Integer, HashMap<Value, Integer>> e: count_issue_values_prev_timewindow.entrySet()) {
 					int issue_id = e.getKey();
 					for (Map.Entry<Value, Integer> f : count_issue_values_prev_timewindow.get(issue_id).entrySet()) {
 						Value value_id = f.getKey();
 						count_issue_values_prev_timewindow.get(issue_id).put(value_id,0);
+						count_issue_values_this_timewindow.get(issue_id).put(value_id,0);
 					}	
 				}
-				System.out.println("After reset/Before resize:");
-				System.out.println(count_issue_values_prev_timewindow.toString());
-				//Resize prev time window to contain the count of the new window size
+				//List of all bids received, sorted by time, with first offer received first
+				List<BidDetails> bid_details = negotiationSession.getOpponentBidHistory().sortToTime().getHistory();
+				
+				//Itereate through list backwards for size of time window iterations
 				for (int i = bid_details.size() - 1; i > bid_details.size()-1-size_of_timewindow; i--) {
+					//Get the issue values for the bid
 					HashMap<Integer,Value> b = bid_details.get(i).getBid().getValues();
+					//Set counter for previous time window
 					for(HashMap.Entry<Integer, Value> e: b.entrySet()) {
 						int issue_id = e.getKey();
 						Value value_id = e.getValue();
@@ -193,23 +173,10 @@ public class KnutModel2 extends OpponentModel {
 						count_issue_values_prev_timewindow.get(issue_id).put(value_id, value_count);
 					}
 				}
-				System.out.println("After resize:");
-				System.out.println(count_issue_values_prev_timewindow.toString());
-				System.out.println("Time window changed");
-				System.out.println("#######################");
-				
-				//Reset this time window
-				for (HashMap.Entry<Integer, HashMap<Value, Integer>> e: count_issue_values_this_timewindow.entrySet()) {
-					int issue_id = e.getKey();
-					for (Map.Entry<Value, Integer> f : count_issue_values_this_timewindow.get(issue_id).entrySet()) {
-						Value value_id = f.getKey();
-						count_issue_values_this_timewindow.get(issue_id).put(value_id,0);
-					}	
-				}
-			}
 
-			else {
+			}
 			// If we should not change size of time window
+			else {
 				//Reset counter
 				count_offers_received_this_timewindow = 1;
 				
@@ -257,12 +224,7 @@ public class KnutModel2 extends OpponentModel {
 			return;
 		}
 		
-		System.out.println("Count this time window before algorithm");
-		System.out.println(count_issue_values_prev_timewindow.toString());
-		System.out.println("Count prev time window before algorithm");
-		System.out.println(count_issue_values_this_timewindow.toString());
-	
-		// Algorithm
+		// Distribution Based Frequency Model Algorithm
 		for (Map.Entry<Integer, HashMap<Value, Integer>> e : count_issue_values_prev_timewindow.entrySet()) {
 			int issue_id = e.getKey();
 			
@@ -304,7 +266,6 @@ public class KnutModel2 extends OpponentModel {
 				freq_issue_values_this_timewindow_array[i] = freq_issue_values_this_timewindow_arrayList.get(i).longValue();
 			}
 			
-			
 			//Chi square test
 			ChiSquareTest t = new ChiSquareTest();
 	        double pval = 1.0;
@@ -317,7 +278,6 @@ public class KnutModel2 extends OpponentModel {
 	        //Cannot reject null hypothesis
 	        if (pval > 0.05) {
 	        	unchanged_issues.add(issue_id);
-	        	System.out.println(issue_id +" Did not change");
 	        }
 	        
 	        //Can reject null hypothesis
@@ -341,10 +301,6 @@ public class KnutModel2 extends OpponentModel {
 	        	//Check for concession
 				if (estimated_issue_utility_this_timewindow < estimated_issue_utility_prev_timewindow) {
 					concession = true;
-					System.out.println(issue_id + " Is conceding");
-				}
-				else {
-					System.out.println(issue_id + " Changed, but is not conceding");
 				}
 	        }
 		}
@@ -354,27 +310,22 @@ public class KnutModel2 extends OpponentModel {
 				estimated_issue_weights.put(i, estimated_issue_weights.get(i)+delta);
 			}
 		}
-		System.out.println("----------------------------");
 	}
 	
 	@Override
 	public double getBidEvaluation(Bid bid) {
-		/*
-		 * En esta parte del modelo debes poner la lógica empleada para que, dada una oferta,
-		 * se utilice el modelo de las preferencias del oponente para determinar su utilidad estimada
-		 */
-			
 		//Estimated utility
 		double	estimated_utility = 0.0;
-		
 		
 		//Obtain the total sum of the estimated weights
 		double estimated_weights_sum = 0.0;
 		
+		//Calculate the sum of the estimated weights
 		for (Map.Entry<Integer, Double> entry : estimated_issue_weights.entrySet()) {
 			estimated_weights_sum += entry.getValue();
-		}
+		}		
 		
+		//If estimated weights sum is zero
 		if (estimated_weights_sum == 0.0) {
 			return 0.2;
 		}
