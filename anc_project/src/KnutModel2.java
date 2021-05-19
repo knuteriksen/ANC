@@ -26,10 +26,6 @@ import genius.core.utility.AdditiveUtilitySpace;
 import negotiator.boaframework.opponentmodel.tools.UtilitySpaceAdapter;
 
 public class KnutModel2 extends OpponentModel {
-	
-	/*
-	 * Define aquí los atributos de la clase y el objeto que necesites
-	 */
 	private double delta;
 	private boolean first_time_window;
 	

@@ -12,9 +12,21 @@ statspaths = ['stats/energy_stats.json',
 'stats/phone_stats.json'
 ]
 
+all_utils_path = 'stats/all_utils.json'
+
+utilspaths = ['stats/energy_u.json',
+'stats/niceordie_u.json',
+'stats/flightbooking_u.json',
+'stats/phone_u.json']
+
+
+
+all_utils = {}
+
 for i, jsonRFilePath in enumerate(resultspath):
 	data = {}
 	stats = {}
+	utils = {}
 
 	# Opening JSON file
 	with open(jsonRFilePath) as json_file:
@@ -33,7 +45,6 @@ for i, jsonRFilePath in enumerate(resultspath):
 			agreement = 1
 		else:
 			agreement = 0
-
 
 		if agent1 not in stats:
 			stats[agent1] = {
@@ -95,6 +106,17 @@ for i, jsonRFilePath in enumerate(resultspath):
 			stats[agent2]['swfs'].append(swf)
 			stats[agent2]['agreements'] = stats[agent2]['agreements'] + agreement
 
+		if agent1 not in all_utils:
+			all_utils[agent1] = [agent1_util]
+		else:
+			all_utils[agent1].append(agent1_util)
+
+		if agent2 not in all_utils:
+			all_utils[agent2] = [agent2_util]
+		else:
+			all_utils[agent2].append(agent2_util)
+
+
 	# Calculate average
 	for key in stats:
 		stats[key]['avgUtil'] = stats[key]['avgUtil']/len(stats[key]['utils'])
@@ -102,7 +124,15 @@ for i, jsonRFilePath in enumerate(resultspath):
 		stats[key]['avgDtn'] = stats[key]['avgDtn']/len(stats[key]['dtns'])
 		stats[key]['avgSwf'] = stats[key]['avgSwf']/len(stats[key]['swfs'])
 
+		utils[key] = stats[key]['utils']
 
 	# Store as json
 	with open(statspaths[i], 'w', encoding='utf-8') as jsonf:
 		jsonf.write(json.dumps(stats, indent=4))
+
+	with open(utilspaths[i], 'w', encoding='utf-8') as jsonf:
+		jsonf.write(json.dumps(utils, indent=4))
+
+
+with open(all_utils_path, 'w', encoding='utf-8') as jsonf:
+	jsonf.write(json.dumps(all_utils, indent=2))
